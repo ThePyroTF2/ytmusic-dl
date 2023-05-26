@@ -8,7 +8,7 @@ songExtensions=()
 playlist=false
 playlistName=""
 verbose=false
-very_verbose=
+very_verbose=""
 
 help() {
 	echo "Usage: ytmusic-dl -[h|v|V] --[version|help|verbose|very-verbose] [URL]"
