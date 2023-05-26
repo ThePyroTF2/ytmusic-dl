@@ -17,3 +17,7 @@ You can change the target directory by editing `dir.txt`.
 	--version: display the program version
 	-v, --verbose: print progress to the console.
 	-V, --very-verbose: run youtube-dl in verbose mode
+
+## Dependencies
+
+This script requires [`youtube-dl`](https://www.github.com/ytdl-org/youtube-dl). Also, if you're on mac, you'll need to install the better version of `getopt`. I just used the `gnu-getopt` Homebrew formula.
