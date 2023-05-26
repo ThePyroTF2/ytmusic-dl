@@ -22,10 +22,12 @@ help() {
 
 TEMP=$(getopt -n ytmusic-dl -o hvV -l version,help,verbose,very_verbose -- "$@")
 
-if [[ $? != 0 ]]; then
+errors=$?
+
+if [[ $errors != 0 ]]; then
 	echo "Error: invalid arguments passed:"
-	for arg in $?; do
-		echo $arg
+	for arg in $errors; do
+		echo "$arg"
 	done
 fi
 
@@ -42,22 +44,22 @@ while :; do
 	esac
 done
 
-if [[ $@ = *"playlist"* ]]; then 
+if [[ $1 = *"playlist"* ]]; then 
 	playlist=true
 fi
 
 if [[ $playlist != true ]]; then
 	while IFS= read -r line; do
 		if [[ $verbose = true ]] || [[ $very_verbose = "-v" ]]; then
-			echo $line
+			echo "$line"
 		fi
-	done < <(youtube-dl -x --audio-format best $very_verbose -o "$workingDir/%(title)s.%(ext)s" $@)
+	done < <(youtube-dl -x --audio-format best $very_verbose -o "$workingDir/%(title)s.%(ext)s" "$1")
 else
-	playlistName=$(youtube-dl --get-filename -o "%(playlist)s" --playlist-items 1 $@)
+	playlistName=$(youtube-dl --get-filename -o "%(playlist)s" --playlist-items 1 "$1")
 
 	while IFS= read -r line; do
-		songNames+=$line
-	done < <(youtube-dl --get-filename -o "%(title)s" $@)
+		songNames+=("$line")
+	done < <(youtube-dl --get-filename -o "%(title)s" "$1")
 
 	mkdir "$workingDir/$playlistName"
 	touch "$workingDir/$playlistName/$playlistName.m3u"
@@ -66,22 +68,22 @@ else
 
 	while IFS= read -r line; do
 		if [[ $verbose = true ]] || [[ $very_verbose = "-v" ]]; then
-			echo $line
+			echo "$line"
 		fi
 		if [[ $line = *"ffmpeg"* ]] && [[ $line = *"Destination"* ]]; then
-			songExtensions+=${line/*./}
+			songExtensions+=("${line/*./}")
 		fi
-	done < <(youtube-dl -x --audio-format best $very_verbose -o "$workingDir/%(playlist)s/%(title)s.%(ext)s" $@)
+	done < <(youtube-dl -x --audio-format best $very_verbose -o "$workingDir/%(playlist)s/%(title)s.%(ext)s" "$1")
 
 	counter=0
 	while IFS= read -r line; do
 		times=()
 		IFS=":" read -ra times <<< "$line"
-		songDuration=$((${times[0]}*60 + ${times[1]}))
+		songDuration=$((times[0]*60 + times[1]))
 		echo "#EXTINF:$songDuration,${songNames[$counter]}" >> "$workingDir/$playlistName/$playlistName.m3u"
 
 		echo "${songNames[$counter]// /%20}.${songExtensions[$counter]}" >> "$workingDir/$playlistName/$playlistName.m3u"
 
-		counter=$(($counter + 1))
-	done < <(youtube-dl --get-duration $@)
+		counter=$((counter + 1))
+	done < <(youtube-dl --get-duration "$1")
 fi
