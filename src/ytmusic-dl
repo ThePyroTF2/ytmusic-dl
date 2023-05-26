@@ -1,0 +1,85 @@
+#!/bin/bash
+
+version="0.0.1"
+workingDir=$(cat /usr/local/ytmusic-dl/dir.txt)
+songNames=()
+songExtensions=()
+playlist=false
+playlistName=""
+verbose=false
+very_verbose=
+
+help() {
+	echo "Usage: ytmusic-dl -[h|v|V] --[version|help|verbose|very-verbose] [URL]"
+	echo "Options:"
+	echo "-h, --help: display this info"
+	echo "--version: display the program version"
+	echo "-v, --verbose: print progress to the console."
+	echo "-V, --very-verbose: run youtube-dl in verbose mode"
+}
+
+TEMP=$(getopt -n ytmusic-dl -o hvV -l version,help,verbose,very_verbose -- "$@")
+
+if [[ $? != 0 ]]; then
+	echo "Error: invalid arguments passed:"
+	for arg in $?; do
+		echo $arg
+	done
+fi
+
+eval set -- "$TEMP"
+
+while :; do
+	case "$1" in
+		-v | --verbose ) verbose=true; shift;;
+		-V | --very-verbose ) very_verbose="-v"; shift;;
+		-h | --help ) help; shift; exit;;
+		--version ) echo $version; shift; exit;;
+		-- ) shift; break;;
+		* ) echo "You've found a shiny error! Don't ask me how you did it!"; exit;;
+	esac
+done
+
+if [[ $@ = *"playlist"* ]]; then 
+	playlist=true
+fi
+
+if [[ $playlist != true ]]; then
+	while IFS= read -r line; do
+		if [[ $verbose = true ]] || [[ $very_verbose = "-v" ]]; then
+			echo $line
+		fi
+	done < <(youtube-dl -x --audio-format best $very_verbose -o "$workingDir/%(title)s.%(ext)s" $@)
+else
+	playlistName=$(youtube-dl --get-filename -o "%(playlist)s" --playlist-items 1 $@)
+
+	while IFS= read -r line; do
+		songNames+=$line
+	done < <(youtube-dl --get-filename -o "%(title)s" $@)
+
+	mkdir "$workingDir/$playlistName"
+	touch "$workingDir/$playlistName/$playlistName.m3u"
+
+	echo "#EXTM3U" > "$workingDir/$playlistName/$playlistName.m3u"
+
+	while IFS= read -r line; do
+		if [[ $verbose = true ]] || [[ $very_verbose = "-v" ]]; then
+			echo $line
+		fi
+		if [[ $line = *"ffmpeg"* ]] && [[ $line = *"Destination"* ]]; then
+			songExtensions+=${line/*./}
+		fi
+	done < <(youtube-dl -x --audio-format best $very_verbose -o "$workingDir/%(playlist)s/%(title)s.%(ext)s" $@)
+
+	counter=0
+	while IFS= read -r line; do
+		times=()
+		IFS=":" read -ra times <<< "$line"
+		songDuration=$((${times[0]}*60 + ${times[1]}))
+		echo "#EXTINF:$songDuration,${songNames[$counter]}" >> "$workingDir/$playlistName/$playlistName.m3u"
+
+		echo "${songNames[$counter]// /%20}.${songExtensions[$counter]}" >> "$workingDir/$playlistName/$playlistName.m3u"
+
+		counter=$(($counter + 1))
+	done < <(youtube-dl --get-duration $@)
+fi
