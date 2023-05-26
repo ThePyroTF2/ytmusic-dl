@@ -11,10 +11,11 @@ very_verbose=
 
 help() {
 	echo "Usage: ytmusic-dl -[h|v|V] --[version|help|verbose|very-verbose] [URL]"
+	echo
 	echo "Options:"
 	echo "-h, --help: display this info"
 	echo "--version: display the program version"
-	echo "-v, --verbose: print progress to the console."
+	echo "-v, --verbose: print progress to the console"
 	echo "-V, --very-verbose: run youtube-dl in verbose mode"
 }
 
