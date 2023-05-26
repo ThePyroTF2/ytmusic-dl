@@ -7,3 +7,13 @@ Just run `ytmusic-dl [URL]` and it'll download a song, playlist, or album to `~/
 You can change the target directory by editing `dir.txt`.
 
 `ytmusic-dl` should be installed to `/usr/local/ytmusic-dl`.
+
+## Usage
+
+	Usage: ytmusic-dl -[h|v|V] --[version|help|verbose|very-verbose] [URL]
+
+	Options:
+	-h, --help: display this info
+	--version: display the program version
+	-v, --verbose: print progress to the console.
+	-V, --very-verbose: run youtube-dl in verbose mode
