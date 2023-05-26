@@ -33,7 +33,7 @@ fi
 
 eval set -- "$TEMP"
 
-while :; do
+while true; do
 	case "$1" in
 		-v | --verbose ) verbose=true; shift;;
 		-V | --very-verbose ) very_verbose="-v"; shift;;
