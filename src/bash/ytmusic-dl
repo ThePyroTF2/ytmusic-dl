@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="1.0.1"
+version="1.1.0"
 workingDir=$(cat /usr/local/ytmusic-dl/dir.txt)
 workingDir=${workingDir/\~/$HOME}
 songNames=()
@@ -38,7 +38,7 @@ while :; do
 		-v | --verbose ) verbose=true; shift;;
 		-V | --very-verbose ) very_verbose="-v"; shift;;
 		-h | --help ) help; shift; exit;;
-		--version ) echo $version; shift; exit;;
+		--version ) echo "ytmusic-dl version $version"; shift; exit;;
 		-- ) shift; break;;
 		* ) echo "You've found a shiny error! Don't ask me how you did it!"; exit;;
 	esac
