@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="1.2.0"
+version="1.2.1"
 workingDir=$(cat /usr/local/ytmusic-dl/dir.txt)
 workingDir=${workingDir/\~/$HOME}
 songNames=()
@@ -67,11 +67,12 @@ else
 	echo "#EXTM3U" > "$workingDir/$playlistName/$playlistName.m3u"
 
 	while IFS= read -r line; do
-		if [[ $verbose = true ]] || [[ $very_verbose = "-v" ]] || [[ $line = *"Error"* ]] || [[ $line = *"[download] Downloading"* ]]; then
+		if [[ $verbose = true ]] || [[ $very_verbose = "-v" ]] || [[ $line = *"Error"* ]] || [[ $line = "[download] Downloading"* ]]; then
 			echo "$line"
 		fi
-		if [[ $line = *"ffmpeg"* ]] && [[ $line = *"Destination"* ]]; then
-			songExtensions+=("${line/*./}")
+		if [[ $line = "[ffmpeg] Destination: "* ]] || [[ $line = "[ffmpeg] Correcting"* ]]; then
+			temp="${line//*./}"
+			songExtensions+=("${temp//\"/}")
 		fi
 	done < <(youtube-dl -x --audio-format best $very_verbose -o "$workingDir/%(playlist)s/%(title)s.%(ext)s" "$1")
 
