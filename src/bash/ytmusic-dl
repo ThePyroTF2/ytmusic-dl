@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="1.2.1"
+version="1.3.0"
 workingDir=$(cat /usr/local/ytmusic-dl/dir.txt)
 workingDir=${workingDir/\~/$HOME}
 songNames=()
@@ -19,6 +19,13 @@ help() {
 	echo "-v, --verbose: print progress to the console"
 	echo "-V, --very-verbose: run youtube-dl in verbose mode"
 }
+
+if [[ "$*" = "" ]]; then
+	echo "Error: no arguments passed"
+	echo
+	help
+	exit
+fi
 
 TEMP=$(getopt -n ytmusic-dl -o hvV -l version,help,verbose,very_verbose -- "$@")
 
